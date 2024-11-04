@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor de Moneda ➔ @xdarkbrx</title>
+    <style>
+        /* Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Cuerpo de la página */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        /* Contenedor principal */
+        .container {
+            width: 90%;
+            max-width: 450px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            text-align: center;
+            color: #333; /* Color de texto por defecto */
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+
+        /* Input y Botón */
+        input, select, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Botón de conversión */
+        .convertButton {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .convertButton:hover {
+            background-color: #0056b3;
+        }
+
+        /* Resultado y tasas de cambio */
+        .result, .exchangeRates {
+            margin-top: 20px;
+            color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .exchangeRates h3 {
+            color: #007bff;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .exchangeRates p {
+            font-size: 0.95em;
+            color: #555;
+            margin: 4px 0;
+        }
+
+        /* Icono del menú */
+        .menu {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .menu:hover {
+            color: #007bff;
+        }
+
+        /* Opciones de color */
+        .colorOptions {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 50px;
+            right: 15px;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .colorOption {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .colorOption:last-child {
+            border-bottom: none;
+        }
+
+        .colorOption:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Selectores de color */
+        .colorPickerContainer,
+        .colorHexInputContainer {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .colorPicker,
+        .hexInput {
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 5px;
+            width: 100px;
+            text-align: center;
+        }
+
+        /* Efectos visuales y tamaño en móviles */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.4em;
+            }
+            .convertButton, input, select, button {
+                font-size: 0.9em;
+            }
+            .exchangeRates p {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="menu" onclick="toggleColorOptions()">☰</div>
+        <div class="colorOptions" id="colorOptions">
+            <div class="colorOption" onclick="showSingleColorPicker()">Seleccionar Color Único</div>
+            <div class="colorOption" onclick="showTwoColorPickers()">Seleccionar Dos Colores (Degradado)</div>
+            <div class="colorOption" onclick="showSingleHexInput()">Ingresar Color Único (HEX)</div>
+            <div class="colorOption" onclick="showTwoHexInputs()">Ingresar Dos Colores (HEX)</div>
+        </div>
+
+        <h1>Convertidor de Moneda ➔ @xdarkbrx</h1>
+        <div>
+            <label for="amount">Importe en TL:</label>
+            <input type="number" id="amount" placeholder="Cantidad en TL">
+        </div>
+        <div>
+            <label for="currency">Convertir a:</label>
+            <select id="currency">
+                <option value="COP">Peso Colombiano (COP)</option>
+                <option value="USD">Dólar (USD)</option>
+                <option value="EUR">Euro (EUR)</option>
+                <option value="GBP">Libra Esterlina (GBP)</option>
+                <option value="BRL">Real Brasileño (BRL)</option>
+                <option value="JPY">Yen Japonés (JPY)</option>
+                <option value="INR">Rupia India (INR)</option>
+            </select>
+        </div>
+        <button class="convertButton" onclick="convertCurrency()">Convertir</button>
+        <div class="result" id="result"></div>
+        
+        <div class="exchangeRates">
+            <h3>Tasas de Cambio</h3>
+            <p>1 TL = 129.44 COP</p>
+            <p>1 TL = 0.0291 USD</p>
+            <p>1 TL = 0.0268 EUR</p>
+            <p>1 TL = 0.023 GBP</p>
+            <p>1 TL = 0.15 BRL</p>
+            <p>1 TL = 4.15 JPY</p>
+            <p>1 TL = 2.43 INR</p>
+        </div>
+
+        <div class="colorPickerContainer" id="colorPickerContainer">
+            <input type="color" id="color1" class="colorPicker" onchange="applyTwoColors()">
+            <input type="color" id="color2" class="colorPicker" onchange="applyTwoColors()">
+        </div>
+
+        <div class="colorHexInputContainer" id="colorHexInputContainer">
+            <input type="text" id="hexColor1" class="hexInput" placeholder="#000000" maxlength="7" onchange="applyTwoHexColors()">
+            <input type="text" id="hexColor2" class="hexInput" placeholder="#FFFFFF" maxlength="7" onchange="applyTwoHexColors()">
+        </div>
+
+        <input type="color" id="singleColorPicker" style="display: none;" onchange="applySingleColor()">
+        <input type="text" id="singleHexColor" class="hexInput" placeholder="#000000" style="display: none;" onchange="applySingleHexColor()">
+    </div>
+
+    <script>
+        const exchangeRates = {
+            COP: 129.44,
+            USD: 0.0291,
+            EUR: 0.0268,
+            GBP: 0.023,
+            BRL: 0.15,
+            JPY: 4.15,
+            INR: 2.43
+        };
+
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const currency = document.getElementById('currency').value;
+            const rate = exchangeRates[currency];
+            const result = amount * rate;
+
+            document.getElementById('result').innerText = `${amount} TL son ${result.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${currency}`;
+        }
+
+        function toggleColorOptions() {
+            const colorOptions = document.getElementById('colorOptions');
+            colorOptions.style.display = colorOptions.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function showSingleColorPicker() {
+            hideAllColorInputs();
+            document.getElementById('singleColorPicker').style.display = 'block';
+        }
+
+        function showTwoColorPickers() {
+            hideAllColorInputs();
+            document.getElementById('colorPickerContainer').style.display = 'flex';
+        }
+
+        function showSingleHexInput() {
+            hideAllColorInputs();
+            document.getElementById('singleHexColor').style.display = 'block';
+        }
+
+        function showTwoHexInputs() {
+            hideAllColorInputs();
+            document.getElementById('colorHexInputContainer').style.display = 'flex';
+        }
+
+        function hideAllColorInputs() {
+            document.getElementById('singleColorPicker').style.display = 'none';
+            document.getElementById('colorPickerContainer').style.display = 'none';
+            document.getElementById('singleHexColor').style.display = 'none';
+            document.getElementById('colorHexInputContainer').style.display = 'none';
+        }
+
+        function applySingleColor() {
+            const color = document.getElementById('singleColorPicker').value;
+            document.body.style.background = color;
+            document.querySelector('.container').style.background = color; // Cambia el color del contenedor
+            adjustTextColor(color);
+        }
+
+        function applyTwoColors() {
+            const color1 = document.getElementById('color1').value;
+            const color2 = document.getElementById('color2').value;
+            document.body.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+            document.querySelector('.container').style.background = `linear-gradient(to right, ${color1}, ${color2})`; // Cambia el color del contenedor
+            adjustTextColor(color1); // Ajusta el color del texto basado en el primer color
+        }
+
+        function applySingleHexColor() {
+            const color = document.getElementById('singleHexColor').value;
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
+                document.body.style.background = color;
+                document.querySelector('.container').style.background = color; // Cambia el color del contenedor
+                adjustTextColor(color);
+            } else {
+                alert("Por favor ingrese un color HEX válido.");
+            }
+        }
+
+        function applyTwoHexColors() {
+            const hexColor1 = document.getElementById('hexColor1').value;
+            const hexColor2 = document.getElementById('hexColor2').value;
+
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(hexColor1) && /^#([0-9A-F]{3}){1,2}$/i.test(hexColor2)) {
+                document.body.style.background = `linear-gradient(to right, ${hexColor1}, ${hexColor2})`;
+                document.querySelector('.container').style.background = `linear-gradient(to right, ${hexColor1}, ${hexColor2})`; // Cambia el color del contenedor
+                adjustTextColor(hexColor1); // Ajusta el color del texto basado en el primer color
+            } else {
+                alert("Por favor ingrese dos colores HEX válidos.");
+            }
+        }
+
+        function adjustTextColor(color) {
+            // Función que determina si el color es oscuro o claro
+            const rgb = hexToRgb(color);
+            const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 255000; // Cálculo de brillo
+            const textColor = brightness < 0.5 ? '#fff' : '#333'; // Cambia a blanco o negro
+            document.querySelector('.container').style.color = textColor; // Cambia el color del texto
+            document.querySelector('h1').style.color = textColor; // Cambia el color del título
+            document.querySelector('.result').style.color = textColor; // Cambia el color del resultado
+            document.querySelector('.exchangeRates').style.color = textColor; // Cambia el color de las tasas de cambio
+        }
+
+        function hexToRgb(hex) {
+            // Convierte un color HEX a RGB
+            let r = 0, g = 0, b = 0;
+            // Eliminar el carácter '#' si está presente
+            hex = hex.replace(/^#/, '');
+            // Parsear el color para obtener los valores RGB
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else if (hex.length === 6) {
+                r = parseInt(hex.slice(0, 2), 16);
+                g = parseInt(hex.slice(2, 4), 16);
+                b = parseInt(hex.slice(4, 6), 16);
+            }
+            return { r, g, b };
+        }
+    </script>
+</body>
+</html>
